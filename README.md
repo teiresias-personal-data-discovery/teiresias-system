@@ -40,4 +40,3 @@ The GDPR-motivated Privacy Enhancing Technology prototype was developed as part 
 ├── inventory-db  . . . . . . . . . . . . . . .   Inventory DB (MongoDB) config
 └── reverse-proxy . . . . . . . . . . . . . . .   Reverse proxy (Traefik) config
 ```
-
