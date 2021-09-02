@@ -18,7 +18,7 @@ The GDPR-motivated Privacy Enhancing Technology prototype was developed as part 
 ![Architecture](https://user-images.githubusercontent.com/38670508/131920658-58dee1ba-4534-4036-acea-c5dc32f8c338.png)
 
 ## User Flow Chart
-![TeiresiasUX](https://user-images.githubusercontent.com/38670508/131920450-6c3f5ec2-b406-48d2-94cf-85d90a0c6ed4.png)
+![userFlow](https://user-images.githubusercontent.com/38670508/131920887-3a035df7-02d6-4cb1-b6eb-7e7c3a6bdfb9.png)
 
 ## Project Map
 ```
