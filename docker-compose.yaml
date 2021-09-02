@@ -1,0 +1,285 @@
+# extended source: https://github.com/apache/airflow/blob/main/docs/apache-airflow/start/docker-compose.yaml visited: 2021-07-24
+
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+# Basic Airflow cluster configuration for CeleryExecutor with Redis and PostgreSQL.
+
+---
+version: "3"
+x-airflow-common: &airflow-common
+  build:
+      context: airflow
+      dockerfile: Dockerfile
+  env_file:
+      - .env
+  environment: &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+    AIRFLOW__CORE__DAG_CONCURRENCY: 64
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN: "postgresql+psycopg2://airflow:${POSTGRES_PASSWORD}@postgres/airflow"
+    AIRFLOW__CELERY__RESULT_BACKEND: "db+postgresql://airflow:${POSTGRES_PASSWORD}@postgres/airflow"
+    AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
+    AIRFLOW__API__AUTH_BACKEND: "airflow.api.auth.backend.basic_auth"
+    # connection for analysis of pasted code  // this kind of connection is not visible through the UI but accessible
+    AIRFLOW_CONN_REPOSITORIES_PATH: fs://?path=%2Fopt%2Fairflow%2Frepositories%2Fpaste_analyzable_code_here
+    # variables to connect to inventory mongo database // this kind of variables are not visible through the UI but accessible via code
+    AIRFLOW_VAR_REPORT_DB_SERVER: "mongodb://${MONGO_REPORTINGMODULE_USERNAME}:${MONGO_REPORTINGMODULE_PASSWORD}@host.docker.internal/${MONGO_INVENTORY_DATABASE}"
+    AIRFLOW_VAR_REPORT_DB_NAME: $MONGO_INVENTORY_DATABASE
+  volumes:
+    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/logs:/opt/airflow/logs
+    - ./airflow/plugins:/opt/airflow/plugins
+    - ./airflow/repositories:/opt/airflow/repositories
+  user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
+  depends_on:
+    &airflow-common-depends-on
+    redis:
+      condition: service_healthy
+    postgres:
+      condition: service_healthy
+
+services:
+  reverse-proxy:
+    container_name: reverse-proxy
+    image: traefik:v2.4
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./reverse-proxy/traefik.yaml:/etc/traefik/traefik.yml:ro
+      - ./reverse-proxy/config.yaml:/etc/traefik/config.yml:ro
+      - ./certs:/etc/certs:ro
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik=true"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=GET,OPTIONS,PATCH,DELETE,CREATE"
+      - "traefik.http.middlewares.cors.headers.accesscontrolmaxage=100"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowHeaders=authorization,content-type"
+      - "traefik.http.middlewares.cors.headers.addvaryheader=true"
+      - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=https://interfaces.docker.localhost,http://localhost:3000"
+    depends_on:
+      - airflow-webserver
+      - inventory-api
+      - interfaces
+      - flower
+
+  postgres: 
+    container_name: postgres
+    image: postgres:13
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: airflow
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retries: 5
+    restart: always
+    networks:
+      - backend
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 30s
+      retries: 50
+    restart: always
+    networks:
+      - backend
+
+  airflow-webserver:
+    container_name: airflow-webserver
+    <<: *airflow-common
+    command: webserver
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+    networks:
+      - proxy
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.airflow.rule=Host(`airflow.docker.localhost`)"
+      - "traefik.http.routers.airflow.tls=true"
+      - "traefik.http.routers.airflow.middlewares=cors"
+
+  airflow-scheduler:
+    container_name: airflow-scheduler
+    <<: *airflow-common
+    command: scheduler
+    healthcheck:
+      test: ["CMD-SHELL", 'airflow jobs check --job-type SchedulerJob --hostname "$${HOSTNAME}"']
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+    networks:
+      - backend
+
+  airflow-worker:
+    container_name: airflow-worker
+    <<: *airflow-common
+    command: celery worker
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - 'celery --app airflow.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"'
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+    networks:
+      - backend
+
+  airflow-init:
+    <<: *airflow-common
+    command: version
+    environment:
+      <<: *airflow-common-env
+      _AIRFLOW_DB_UPGRADE: "true"
+      _AIRFLOW_WWW_USER_CREATE: "true"
+      _AIRFLOW_WWW_USER_USERNAME: "${AIRFLOW__WEBSERVER_USER}"
+      _AIRFLOW_WWW_USER_PASSWORD: "${AIRFLOW__WEBSERVER_PW}"
+    networks:
+      - backend
+
+  airflow-cli:
+    <<: *airflow-common
+    profiles:
+      - debug
+    environment:
+      <<: *airflow-common-env
+      CONNECTION_CHECK_MAX_COUNT: "0"
+    # Workaround for entrypoint issue. See: https://github.com/apache/airflow/issues/16252
+    command:
+      - bash
+      - -c
+      - airflow
+
+  flower:
+    container_name: flower
+    <<: *airflow-common
+    command: celery flower
+    ports:
+      - 5555:5555
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:5555/"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+    networks:
+      - proxy
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flower.rule=Host(`flower.docker.localhost`)"
+      - "traefik.http.routers.flower.tls=true"
+    
+  inventory-db:
+    container_name: inventory-db
+    image: mongo:latest
+    env_file:
+      - .env
+    ports:
+      - 27017:27017
+    volumes:
+      - inventory-db-volume:/data/db
+      - ./inventory-db/initdb.d:/docker-entrypoint-initdb.d
+    restart: always
+    networks:
+      - backend
+
+  inventory-api:    
+    container_name: inventory-api
+    env_file:
+      - .env
+    build:
+      context: inventory-api
+      dockerfile: Dockerfile
+    ports:
+      - 3001:3001
+    depends_on:
+      - inventory-db
+    restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - proxy
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.inventory-api.rule=Host(`inventory-api.docker.localhost`)"
+      - "traefik.http.routers.inventory-api.tls=true"
+      - "traefik.http.routers.inventory-api.middlewares=cors"
+
+  interfaces:
+    container_name: interfaces
+    build:
+      args: 
+        REACT_APP_INVENTORYAPI_BASE: $INVENTORYAPI_BASE
+        REACT_APP_AIRFLOW_BASE: $AIRFLOW_BASE
+        REACT_APP_FLOWER_BASE: $FLOWER_BASE
+      context: interfaces
+      dockerfile: Dockerfile
+    restart: always
+    networks:
+      - proxy
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.interfaces.rule=Host(`interfaces.docker.localhost`)"
+      - "traefik.http.routers.interfaces.tls=true"
+
+volumes:
+  postgres-db-volume:
+  inventory-db-volume:
+
+networks:
+  proxy:
+    external: true
+  backend:

@@ -1,0 +1,22 @@
+{
+  "folders": [
+    {
+      "path": "."
+    },
+    {
+      "path": "airflow"
+    },
+    {
+      "path": "inventory-db"
+    },
+    {
+      "path": "inventory-api"
+    },
+    {
+      "path": "interfaces"
+    }
+  ],
+  "settings": {
+    "eslint.workingDirectories": ["inventory-api", "interfaces"]
+  }
+}

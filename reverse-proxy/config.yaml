@@ -1,0 +1,21 @@
+# source: https://github.com/Heziode/traefik-v2-https-ssl-localhost/blob/master/traefik/config.yml accessed on 2021-06-30
+# license MIT
+
+http:
+  routers:
+    traefik:
+      rule: "Host(`traefik.docker.localhost`)"
+      service: "api@internal"
+      tls:
+        domains:
+          - main: "docker.localhost"
+            sans:
+              - "*.docker.localhost"
+          - main: "domain.local"
+            sans:
+              - "*.domain.local"
+
+tls:
+  certificates:
+    - certFile: "/etc/certs/cert.pem"
+      keyFile: "/etc/certs/key.pem"

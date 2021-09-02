@@ -1,0 +1,54 @@
+{
+  "name": "interfaces",
+  "version": "1.0.0",
+  "license": "MIT",
+  "dependencies": {
+    "@ant-design/icons": "^4.5.0",
+    "antd": "^4.14.0",
+    "lodash": "^4.17.21",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-rewards": "^1.1.2",
+    "react-icons": "4.2.0",
+    "react-scripts": "4.0.3",
+    "react-json-editor-ajrm": "2.5.13",
+    "styled-components": "^5.2.1",
+    "superagent": "^6.1.0",
+    "superagent-no-cache": "^0.1.1",
+    "moment": "2.29.1",
+    "web-vitals": "^1.0.1"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/react": "^11.1.0",
+    "@testing-library/user-event": "^12.1.10",
+    "eslint-plugin-react-hooks": "^4.2.0",    
+    "eslint-plugin-jsx-a11y": "6.2.3",
+    "eslint-config-prettier": "^6.11.0",
+    "prettier": "2.1.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

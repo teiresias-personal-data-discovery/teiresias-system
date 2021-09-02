@@ -1,0 +1,8 @@
+pytest
+mergedeep
+ruamel.yaml
+git.Repo
+pymongo
+sqlalchemy
+python-Levenshtein
+fuzzywuzzy
