@@ -64,12 +64,12 @@ $ docker-compose up
       # while system is running, copy public key from second terminal
       <your_host> $ docker exec -it airflow-webserver bash
       # on the container, print public key on bash
-      <airflow> $ cat ~/.ssh/id_rsa.pub
+      <container> $ cat ~/.ssh/id_rsa.pub
       # copy to clipboard
       ```
 
     - paste public key to access control SSH-key section of your repository hosting service (e.g. GitHub: to SSH section of user with access, Bitbucket: to SSH section of repository)
-- enable network access to all hosts which have to be examined, such as Databases
-- workflows
+- Enable network access to all hosts which have to be examined, such as Databases
+- Workflows; configure from Airflow Web Server GUI:
   - unpause all Airflow DAGs
-  - start DAG _A2_manually_code_analysis_ to enable filesystem-sensoring in order to analyse manually pasted IaC 
+  - start (trigger manually) DAG _A2_manually_code_analysis_ to enable filesystem-sensoring in order to analyse manually pasted IaC 
