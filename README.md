@@ -9,14 +9,16 @@ The GDPR-motivated Privacy Enhancing Technology prototype was developed as part 
 
 ---
 
-- <a href="README.md#section">Deployment</a>
+- <a href="https://github.com/teiresias-personal-data-discovery/teiresias-system/blob/210ab7e60a93b9a0cc675f84be6e4ce25640ed99/docs/deployment.md#deployment">Deployment</a>
 
-- <a href="README.md#section">Troubleshooting</a>
+- <a href="https://github.com/teiresias-personal-data-discovery/teiresias-system/blob/main/docs/troubleshooting.md#troubleshooting
+">Troubleshooting</a>
 
 ## Architecture
-
+![Architecture](https://user-images.githubusercontent.com/38670508/131920658-58dee1ba-4534-4036-acea-c5dc32f8c338.png)
 
 ## User Flow Chart
+![userFlow](https://user-images.githubusercontent.com/38670508/131920887-3a035df7-02d6-4cb1-b6eb-7e7c3a6bdfb9.png)
 
 ## Project Map
 ```
