@@ -37,6 +37,7 @@
   - set `.env`-variable _AIRFLOW_GID_ to unused groupId within host
   - 
     ```bash
+    $ mkdir airflow/repositories 
     # replace <AIRFLOW_GID> with groupId, e.g 50000
     $ sudo chown :<AIRFLOW_GID> airflow/dags airflow/logs airflow/plugins airflow/repositories 
     $ sudo chmod 775 airflow/dags airflow/logs airflow/plugins airflow/repositories 
