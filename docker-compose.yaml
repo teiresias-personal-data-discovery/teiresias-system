@@ -272,7 +272,7 @@ services:
       - backend
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.interfaces.rule=Host(`§{INTERFACES_HOST}`)"
+      - "traefik.http.routers.interfaces.rule=Host(`${INTERFACES_HOST}`)"
       - "traefik.http.routers.interfaces.tls=true"
 
 volumes:
