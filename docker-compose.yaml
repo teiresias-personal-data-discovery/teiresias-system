@@ -76,7 +76,7 @@ services:
       - "traefik.http.middlewares.cors.headers.accesscontrolmaxage=100"
       - "traefik.http.middlewares.cors.headers.accessControlAllowHeaders=authorization,content-type"
       - "traefik.http.middlewares.cors.headers.addvaryheader=true"
-      - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=https://interfaces.docker.localhost,http://localhost:3000"
+      - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=${INTERFACES_BASE},http://localhost:3000"
     depends_on:
       - airflow-webserver
       - inventory-api
@@ -131,7 +131,7 @@ services:
       - backend
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.airflow.rule=Host(`airflow.docker.localhost`)"
+      - "traefik.http.routers.airflow.rule=Host(`${AIRFLOW_HOST}`)"
       - "traefik.http.routers.airflow.tls=true"
       - "traefik.http.routers.airflow.middlewares=cors"
 
@@ -217,7 +217,7 @@ services:
       - backend
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.flower.rule=Host(`flower.docker.localhost`)"
+      - "traefik.http.routers.flower.rule=Host(`${FLOWER_HOST}`)"
       - "traefik.http.routers.flower.tls=true"
     
   inventory-db:
@@ -253,7 +253,7 @@ services:
       - backend
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.inventory-api.rule=Host(`inventory-api.docker.localhost`)"
+      - "traefik.http.routers.inventory-api.rule=Host(`${INVENTORYAPI_HOST}`)"
       - "traefik.http.routers.inventory-api.tls=true"
       - "traefik.http.routers.inventory-api.middlewares=cors"
 
@@ -272,7 +272,7 @@ services:
       - backend
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.interfaces.rule=Host(`interfaces.docker.localhost`)"
+      - "traefik.http.routers.interfaces.rule=Host(`§{INTERFACES_HOST}`)"
       - "traefik.http.routers.interfaces.tls=true"
 
 volumes:
