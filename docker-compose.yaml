@@ -46,6 +46,8 @@ x-airflow-common: &airflow-common
     - ./airflow/plugins:/opt/airflow/plugins
     - ./airflow/repositories:/opt/airflow/repositories
   user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
+  extra_hosts:
+      - "host.docker.internal:host-gateway"
   depends_on:
     &airflow-common-depends-on
     redis:
