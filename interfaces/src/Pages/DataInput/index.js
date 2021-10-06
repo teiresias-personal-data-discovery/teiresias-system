@@ -4,6 +4,7 @@ import { CloudUploadOutlined } from '@ant-design/icons';
 import JSONInput from 'react-json-editor-ajrm/index';
 import locale from 'react-json-editor-ajrm/locale/en';
 import styled from 'styled-components';
+import _ from 'lodash';
 
 import Buttons from '../Buttons';
 import { Wrapper } from '../Variables/Repositories';
@@ -36,9 +37,14 @@ const Identifier = styled(Input)`
 
 const placeholder = { Teiresias: 'Paste your analyzable JSON here.' };
 
-const DataInput = ({ workflowStatus, triggerWorkflow, headers }) => {
+const DataInput = ({
+  workflowStatus,
+  triggerWorkflow,
+  headers,
+  resetWorkflowStatus,
+}) => {
   const [analysisTitle, setAnalysisTitle] = useState(null);
-  const [json, setJson] = useState(null);
+  const [json, setJson] = useState(placeholder);
 
   const handleJsonInput = useCallback((input) => {
     if (!input.error) {
@@ -83,36 +89,37 @@ const DataInput = ({ workflowStatus, triggerWorkflow, headers }) => {
   useEffect(() => {
     if (workflowStatus === 'success') {
       openNotification('success');
+      resetWorkflowStatus();
       resetInputs();
     }
     if (workflowStatus === 'error') {
       openNotification('error');
+      resetWorkflowStatus();
     }
-  }, [workflowStatus, openNotification, resetInputs]);
+  }, [workflowStatus, openNotification, resetInputs, resetWorkflowStatus]);
 
   return (
     <Wrapper column align="center">
       <Buttons error={workflowStatus === 'error' && workflowStatus}>
-        {json && (
-          <>
-            <Identifier
-              size="small"
-              placeholder="input JSON identifier"
-              onChange={setTitle}
-            />
-            <Button
-              type="primary"
-              size="large"
-              icon={<CloudUploadOutlined />}
-              onClick={triggerDataAnalysis}
-              disabled={
-                !analysisTitle || (workflowStatus === 'pending' && !headers)
-              }
-            >
-              Analyze JSON
-            </Button>
-          </>
-        )}
+        <Identifier
+          size="small"
+          placeholder="input JSON identifier"
+          onChange={setTitle}
+        />
+
+        <Button
+          type="primary"
+          size="large"
+          icon={<CloudUploadOutlined />}
+          onClick={triggerDataAnalysis}
+          disabled={
+            _.isEmpty(json) ||
+            !analysisTitle ||
+            (workflowStatus === 'pending' && !headers)
+          }
+        >
+          Analyze JSON
+        </Button>
       </Buttons>
       <JSONInput
         style={inputStyle}

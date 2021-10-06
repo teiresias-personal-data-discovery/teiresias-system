@@ -16,8 +16,8 @@ const storageTypes = [
   { label: 'PostgreSQL', key: 'postgres' },
 ];
 
-const storageOptions = [
-  { label: 'mongodb://', key: 'mongodb' },
+export const storageOptions = [
+  { label: 'mongodb://', key: 'mongodb', default: true },
   { label: 'mongodb+srv://', key: 'srv' },
 ];
 
@@ -70,7 +70,10 @@ export const InputFactory = ({
           value={value}
           onChange={setPendingURIOption(storageIdentifier)}
           disabled={isDisabled}
-          defaultValue="mongodb://"
+          defaultValue={_.chain(storageOptions)
+            .find({ default: true })
+            .get('label')
+            .value()}
         >
           {storageOptions.map(({ key, label }) => (
             <Select.Option key={key}>{label}</Select.Option>
