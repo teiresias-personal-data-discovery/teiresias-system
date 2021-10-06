@@ -63,9 +63,20 @@ const useWorkflow = () => {
     [setWorkflowStatuses]
   );
 
+  const resetWorkflowStatus = useCallback(
+    (workflow) => () => {
+      setWorkflowStatuses((prevWorkflowStatuses) => ({
+        ...prevWorkflowStatuses,
+        [workflow]: null,
+      }));
+    },
+    []
+  );
+
   return {
     triggerWorkflow,
     workflowStatuses,
+    resetWorkflowStatus,
   };
 };
 export default useWorkflow;

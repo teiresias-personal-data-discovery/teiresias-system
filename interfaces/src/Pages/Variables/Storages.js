@@ -7,6 +7,7 @@ import Storage from './Storage';
 import Buttons from '../Buttons';
 import ErrorBoundary from '../../Base/ErrorBoundary';
 import { Wrapper } from './Repositories';
+import { storageOptions } from './StorageInput';
 
 const NoData = styled(Empty)`
   .ant-empty-description {
@@ -56,7 +57,16 @@ const Storages = ({
 
   const setPendingStorage = useCallback(
     (key) => (value) => {
-      setPending(key)('storage_type', value);
+      if (value === 'mongodb') {
+        const defaultStorageOption = _.chain(storageOptions)
+          .find({ default: true })
+          .get('key')
+          .value();
+        setPending(key)('uri_option', defaultStorageOption);
+        setPending(key)('storage_type', value);
+      } else {
+        setPending(key)('storage_type', value, 'uri_option');
+      }
     },
     [setPending]
   );

@@ -44,7 +44,11 @@ const Page = ({ activeKey }) => {
     variablesStatus,
   } = useVariables();
 
-  const { triggerWorkflow, workflowStatuses } = useWorkflow();
+  const {
+    triggerWorkflow,
+    workflowStatuses,
+    resetWorkflowStatus,
+  } = useWorkflow();
 
   const workflowTrigger = useCallback(
     (workflow) => (conf) => {
@@ -77,6 +81,7 @@ const Page = ({ activeKey }) => {
     case 'dataInput':
       return (
         <DataInput
+          resetWorkflowStatus={resetWorkflowStatus('dataInput')}
           workflowStatus={_.get(workflowStatuses, 'dataInput')}
           triggerWorkflow={workflowTrigger('dataInput')}
         />
@@ -84,8 +89,6 @@ const Page = ({ activeKey }) => {
     case 'env':
       return (
         <Storages
-          workflowStatus={_.get(workflowStatuses, 'storages')}
-          triggerWorkflow={workflowTrigger('storages')}
           storageCredentials={storageCredentials}
           isLoading={isLoadingVariables}
           variablesError={variablesError}
@@ -97,8 +100,6 @@ const Page = ({ activeKey }) => {
     case 'git':
       return (
         <Repositories
-          workflowStatus={_.get(workflowStatuses, 'repositories')}
-          triggerWorkflow={workflowTrigger('repositories')}
           repositories={repositories}
           isLoading={isLoadingVariables}
           variablesError={variablesError}

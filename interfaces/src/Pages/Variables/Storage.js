@@ -49,24 +49,24 @@ const missingValueError = `Please add the missing values to enable the personal 
 const userEditedInfo = `Values have been edited, thus won't be overwritten by future storage discovery.`;
 
 const credentialKeys = [
-  { label: 'Host*', key: 'host' },
-  { label: 'DB Name*', key: 'db' },
+  { label: 'Host*', key: 'host', mandatory: true },
+  { label: 'DB Name*', key: 'db', mandatory: true },
   {
     label: 'Port',
     key: 'port',
     disabled: { key: 'uri_option', value: 'srv' },
   },
-  { label: 'User*', key: 'user' },
-  { label: 'Type*', key: 'storage_type' },
+  { label: 'User*', key: 'user', mandatory: true },
+  { label: 'Type*', key: 'storage_type', mandatory: true },
   {
     label: 'URI*',
     key: 'uri_option',
     required: { key: 'storage_type', value: 'mongodb' },
   },
-  { label: 'Password*', key: 'password' },
+  { label: 'Password*', key: 'password', mandatory: true },
 ];
 const mandatoryKeys = _.chain(credentialKeys)
-  .filter(({ key }) => key !== 'port')
+  .filter(({ mandatory }) => mandatory)
   .map(({ key }) => key)
   .value();
 
