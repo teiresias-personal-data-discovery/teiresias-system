@@ -1,4 +1,5 @@
 from airflow.models.baseoperator import BaseOperator
+from airflow import AirflowException
 from sqlalchemy import create_engine, inspect
 
 from operators.data_retrieval_and_analysis.utils.common import get_uri, get_serializable_sqlalchemy_type
@@ -60,7 +61,8 @@ class Retrieve_postgre_meta(BaseOperator):
                     meta_data = {**meta_data, table: table_meta}
 
         except Exception as e:
-            meta_data = {**meta_data, 'error': f"self.storage_name: {repr(e)}"}
+            meta_data = {'error': f"self.storage_name: {repr(e)}"}
+            raise AirflowException(meta_data)
 
         context["task_instance"].xcom_push(
             key=f"{context['dag_run'].run_id}*meta_data*{self.storage_name}",
