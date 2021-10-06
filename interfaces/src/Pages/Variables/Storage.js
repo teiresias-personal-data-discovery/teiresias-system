@@ -41,8 +41,8 @@ const InputWrapper = styled(Flex)`
   }
 `;
 
-const connectError = `This Storage wasn't accessible in the last storage discovery run.
-                  You can check the Airflow logs for details on the error.`;
+const connectError = (error) =>
+  `There was an error with this storage in the last discovery run: ${error}`;
 
 const missingValueError = `Please add the missing values to enable the personal data discovery on that storage`;
 
@@ -148,8 +148,8 @@ const Storage = ({
       key={storageIdentifier}
       info={
         <>
-          {values.last_run_errored_at && (
-            <Tooltip title={connectError}>
+          {values.last_run_error && (
+            <Tooltip title={connectError(values.last_run_error)}>
               <ErrorIcon />
             </Tooltip>
           )}

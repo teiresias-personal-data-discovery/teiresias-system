@@ -1,5 +1,9 @@
 from airflow.models.baseoperator import BaseOperator
+from airflow import AirflowException
+from airflow.models import Variable
+
 from sqlalchemy import create_engine, inspect
+import json
 
 from operators.data_retrieval_and_analysis.utils.common import get_uri, get_serializable_sqlalchemy_type
 
@@ -60,8 +64,25 @@ class Retrieve_postgre_meta(BaseOperator):
                     meta_data = {**meta_data, table: table_meta}
 
         except Exception as e:
-            meta_data = {**meta_data, 'error': f"self.storage_name: {repr(e)}"}
+            # add error info to storage object in order to retrieve info in frontend
+            storages = Variable.get("storages", deserialize_json=True)
+            storages = {
+                **storages, self.storage_name: {
+                    **storages.get(self.storage_name, {}), "last_run_error":
+                    repr(e)
+                }
+            }
+            Variable.set("storages", json.dumps(storages))
+            raise AirflowException(repr(e))
+
 
         context["task_instance"].xcom_push(
             key=f"{context['dag_run'].run_id}*meta_data*{self.storage_name}",
             value=meta_data)
+
+        # remove potential error info (of prior errored runs) from storage object if connection success
+        storages = Variable.get("storages", deserialize_json=True)
+        last_run_error = storages.get(self.storage_name, {}).get('last_run_error')
+        if last_run_error is not None:
+            storages.get(self.storage_name).pop('last_run_error', None)
+            Variable.set("storages", json.dumps(storages))
