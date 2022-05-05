@@ -4,7 +4,6 @@
 
 ## Discovery and Inventory of Personal Data in Distributed Systems Environments
 *Teiresias* is a distributed system, consisting of an Apache Airflow Celery Cluster and an additional Client-Server architecture for semi-automatic discovery and inventory of personal data in distributed systems environments. 
-The GDPR-motivated Privacy Enhancing Technology prototype was developed as part of a Bachelor's Thesis at the *Technische Universität Berlin*.
 
 
 ---
