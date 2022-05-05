@@ -14,7 +14,7 @@
 ">Troubleshooting</a>
 
 ## Architecture
-![Architecture](https://user-images.githubusercontent.com/38670508/131920658-58dee1ba-4534-4036-acea-c5dc32f8c338.png)
+![Architecture](docs/architecture.png)
 
 ## User Flow Chart
 ![userFlow](https://user-images.githubusercontent.com/38670508/131920887-3a035df7-02d6-4cb1-b6eb-7e7c3a6bdfb9.png)
