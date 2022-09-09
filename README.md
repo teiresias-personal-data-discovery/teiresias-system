@@ -16,8 +16,8 @@
 ## Architecture
 ![Architecture](docs/architecture.png)
 
-## User Flow Chart
-![userFlow](https://user-images.githubusercontent.com/38670508/131920887-3a035df7-02d6-4cb1-b6eb-7e7c3a6bdfb9.png)
+## Interaction Flow Chart
+![userFlow](docs/interaction.png)
 
 ## Project Map
 ```
